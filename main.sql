@@ -7,9 +7,7 @@ INSERT INTO users VALUES
     (5, 'eve@x.io',   'US', 22),
     (6, 'frank@x.io', 'US', 55);
 
--- TODO: create a composite index on (country, age) so the query below
--- can filter and sort using the index alone.
--- CREATE INDEX ...
+CREATE INDEX idx_users_country_age ON users (country, age);
 
 SELECT email FROM users
 WHERE country = 'US' AND age >= 30
