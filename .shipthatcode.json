@@ -1,0 +1,38 @@
+{
+  "course": "sql-advanced",
+  "language": "sql",
+  "language_id": 82,
+  "entrypoint": "main.sql",
+  "version": 1,
+  "content_hash": "de30b859f9f76cc2",
+  "lessons": [
+    {
+      "slug": "indexes",
+      "tests_hash": "dc95200a6e66"
+    },
+    {
+      "slug": "recursive-ctes",
+      "tests_hash": "17daaf14adff"
+    },
+    {
+      "slug": "window-frames",
+      "tests_hash": "a1c01f51999b"
+    },
+    {
+      "slug": "json",
+      "tests_hash": "e9dc3d5e919b"
+    },
+    {
+      "slug": "views",
+      "tests_hash": "d2bdb946a140"
+    },
+    {
+      "slug": "triggers",
+      "tests_hash": "4383f188164c"
+    },
+    {
+      "slug": "explain",
+      "tests_hash": "895681cb962a"
+    }
+  ]
+}
