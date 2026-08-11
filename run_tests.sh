@@ -10,10 +10,9 @@ FILTER="${1:-}"
 # Test dirs are zero-padded (01-, 02-, …) — accept "./run_tests.sh 3" too.
 case "$FILTER" in [1-9]) FILTER="0$FILTER" ;; esac
 
-# Languages the grader supports but this local runner can't fake reliably
-# yet. The website's Check is the official grade either way.
+# Prolog still isn't supported locally; SQL runs via sqlite3 or Python.
 case "$LANG_SLUG" in
-  sql|prolog)
+  prolog)
     echo "The local runner doesn't support $LANG_SLUG yet."
     echo "Write your code here, push, and grade with 'Check my solution' on the lesson page."
     exit 2 ;;
@@ -24,6 +23,7 @@ CC_BIN=cc;  command -v gcc >/dev/null 2>&1 && CC_BIN=gcc
 CXX_BIN=c++; command -v g++ >/dev/null 2>&1 && CXX_BIN=g++
 # Windows installs often have "python", not "python3".
 PY_BIN=python3; command -v python3 >/dev/null 2>&1 || PY_BIN=python
+ROOT="$(cd "$(dirname "$0")" && pwd)"
 
 compile() {
   case "$LANG_SLUG" in
@@ -50,8 +50,21 @@ compile() {
   esac
 }
 
+run_sql() { # $1 = optional .in file (prepended if non-empty)
+  if command -v sqlite3 >/dev/null 2>&1; then
+    if [ -s "$1" ]; then
+      cat "$1" "$ENTRY" | sqlite3 -batch -noheader :memory:
+    else
+      sqlite3 -batch -noheader :memory: < "$ENTRY"
+    fi
+  else
+    "$PY_BIN" "$ROOT/.run_sql.py" "$ENTRY" "$1"
+  fi
+}
+
 run_one() { # $1 = input file
   case "$LANG_SLUG" in
+    sql)        run_sql "$1" ;;
     c|cpp|rust|assembly|basic|cobol|d|fortran|pascal) ./.prog < "$1" ;;
     csharp|vbnet) mono .prog.exe < "$1" ;;
     kotlin)     java -jar .prog.jar < "$1" ;;
@@ -93,12 +106,14 @@ for dir in tests/${FILTER}*/; do
   for input in "$dir"*.in; do
     [ -f "$input" ] || continue
     expected="${input%.in}.out"
-    actual="$(run_one "$input")"
-    if [ "$actual" = "$(cat "$expected")" ]; then
+    # Normalize CRLF so Windows Python/sqlite output matches Linux .out files.
+    actual="$(run_one "$input" | tr -d '\r')"
+    want="$(tr -d '\r' < "$expected")"
+    if [ "$actual" = "$want" ]; then
       pass=$((pass+1)); echo "PASS  $input"
     else
       fail=$((fail+1)); echo "FAIL  $input"
-      echo "  expected: $(head -c 200 "$expected")"
+      echo "  expected: $(printf '%s' "$want" | head -c 200)"
       echo "  got:      $(printf '%s' "$actual" | head -c 200)"
     fi
   done
