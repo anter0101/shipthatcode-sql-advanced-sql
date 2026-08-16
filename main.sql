@@ -12,7 +12,7 @@ VALUES
     ('2026-01-05', 200);
 
 SELECT
-    EXTRACT(DAY FROM day)::int
+    CAST(strftime('%d', day) AS INTEGER)
     || '|' ||
     SUM(amount) OVER (ORDER BY day) AS result
 FROM sales;
