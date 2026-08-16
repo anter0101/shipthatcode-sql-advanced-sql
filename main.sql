@@ -11,6 +11,8 @@ VALUES
     ('2026-01-04', 25),
     ('2026-01-05', 200);
 
-    SELECT
-    day || '|' || SUM(amount) OVER (ORDER BY day) AS result
+SELECT
+    EXTRACT(DAY FROM day)::int
+    || '|' ||
+    SUM(amount) OVER (ORDER BY day) AS result
 FROM sales;
